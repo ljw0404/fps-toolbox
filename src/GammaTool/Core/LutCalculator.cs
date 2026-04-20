@@ -6,12 +6,12 @@ namespace GammaTool.Core;
 /// <summary>
 /// 根据 <see cref="GammaConfig"/> 计算 256 项 LUT（Gamma Ramp）。
 ///
-/// 基础公式（每个通道独立计算）：
-///   x        = i / 255                              // 归一化输入
-///   xContr   = (x - 0.5) * (1 + contrast) + 0.5     // 对比度（围绕 0.5 展开）
-///   xBright  = xContr + brightness                   // 亮度（平移）
-///   xGamma   = pow(clamp(xBright, 0, 1), 1 / gamma) // Gamma
-///   lut[i]   = round(xGamma * 65535)                // 16-bit 输出
+/// 基础公式（每个通道独立计算，所有参数均为 Gamma Panel 惯例）：
+///   x        = i / 255                         // 归一化输入
+///   xContr   = (x - 0.5) * contrast + 0.5      // 对比度（contrast=1 表示不变）
+///   xBright  = xContr + brightness             // 亮度（brightness=0 表示不变）
+///   xGamma   = pow(clamp(xBright, 0, 1), 1/gamma)
+///   lut[i]   = round(xGamma * 65535)           // 16-bit 输出
 /// </summary>
 public static class LutCalculator
 {
@@ -56,7 +56,8 @@ public static class LutCalculator
     private static double SampleNormalized(int i, ChannelParams p)
     {
         double x = i / 255.0;
-        double xc = (x - 0.5) * (1.0 + p.Contrast) + 0.5;
+        double contrast = p.Contrast <= 1e-4 ? ChannelParams.ContrastNeutral : p.Contrast; // 兼容旧值 0
+        double xc = (x - 0.5) * contrast + 0.5;
         double xb = xc + p.Brightness;
         if (xb < 0) xb = 0;
         if (xb > 1) xb = 1;

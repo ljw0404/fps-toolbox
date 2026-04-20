@@ -20,9 +20,10 @@ public class ToolRegistry
     //   填的是当前 release.ps1 已经发出去的版本 tag 下的 zip 直链。
     //   升级时在发版脚本里 bump 版本号即可,这里不用改。
     // ──────────────────────────────────────────────────────────────
-    private const string FallbackVersion = "1.0.0";
-    private static string ToolZipUrl(string prefix, string toolName) =>
-        $"https://github.com/{UpdateConstants.GitHubOwner}/{UpdateConstants.GitHubRepo}/releases/download/{prefix}v{FallbackVersion}/{toolName}-v{FallbackVersion}.zip";
+    private const string FallbackCrosshairVersion = "1.0.0";
+    private const string FallbackGammaVersion = "1.1.0";
+    private static string ToolZipUrl(string prefix, string toolName, string version) =>
+        $"https://github.com/{UpdateConstants.GitHubOwner}/{UpdateConstants.GitHubRepo}/releases/download/{prefix}v{version}/{toolName}-v{version}.zip";
 
     public static IReadOnlyList<ToolDescriptor> AllDescriptors { get; } = new[]
     {
@@ -32,7 +33,7 @@ public class ToolRegistry
             DisplayName = "屏幕准心工具",
             Description = "全屏置顶的自定义准心，点击穿透不影响游戏操作。支持多种样式、颜色、轮廓、热键切换。",
             DefaultExeRelativePath = @"tools\CrosshairTool\CrosshairTool.exe",
-            DownloadUrl = ToolZipUrl(UpdateConstants.TagPrefix.Crosshair, "CrosshairTool"),
+            DownloadUrl = ToolZipUrl(UpdateConstants.TagPrefix.Crosshair, "CrosshairTool", FallbackCrosshairVersion),
         },
         new ToolDescriptor
         {
@@ -40,7 +41,7 @@ public class ToolRegistry
             DisplayName = "屏幕调节工具",
             Description = "复刻 Gamma Panel 的屏幕灰度 / 亮度 / 对比度调节工具，支持 RGB 通道独立、LUT 曲线预览和配色方案。",
             DefaultExeRelativePath = @"tools\GammaTool\GammaTool.exe",
-            DownloadUrl = ToolZipUrl(UpdateConstants.TagPrefix.Gamma, "GammaTool"),
+            DownloadUrl = ToolZipUrl(UpdateConstants.TagPrefix.Gamma, "GammaTool", FallbackGammaVersion),
         },
     };
 

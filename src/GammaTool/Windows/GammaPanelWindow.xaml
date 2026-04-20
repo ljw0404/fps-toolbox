@@ -23,6 +23,15 @@
             <Setter Property="Padding" Value="4,2"/>
             <Setter Property="Height" Value="24"/>
         </Style>
+        <!-- 数值输入框:与滑块联动 -->
+        <Style x:Key="ValueInput" TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
+            <Setter Property="Width" Value="66"/>
+            <Setter Property="HorizontalAlignment" Value="Right"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="4,0,0,0"/>
+            <Setter Property="FontFamily" Value="Consolas"/>
+        </Style>
         <Style TargetType="Button">
             <Setter Property="Background" Value="#007ACC"/>
             <Setter Property="Foreground" Value="White"/>
@@ -226,26 +235,23 @@
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="80"/>
                             <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="60"/>
+                            <ColumnDefinition Width="76"/>
                         </Grid.ColumnDefinitions>
 
                         <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource Lbl}" Text="Gamma"/>
                         <Slider x:Name="SldMGamma" Grid.Row="0" Grid.Column="1"
                                 Minimum="0.1" Maximum="4" SmallChange="0.01" ValueChanged="OnSliderChanged" Tag="M-G"/>
-                        <TextBlock x:Name="TxtMGamma" Grid.Row="0" Grid.Column="2" Style="{StaticResource Lbl}"
-                                   HorizontalAlignment="Right"/>
+                        <TextBox x:Name="TxtMGamma" Grid.Row="0" Grid.Column="2" Style="{StaticResource ValueInput}" Tag="M-G"/>
 
                         <TextBlock Grid.Row="1" Grid.Column="0" Style="{StaticResource Lbl}" Text="亮度"/>
                         <Slider x:Name="SldMBright" Grid.Row="1" Grid.Column="1"
                                 Minimum="-1" Maximum="1" SmallChange="0.01" ValueChanged="OnSliderChanged" Tag="M-B"/>
-                        <TextBlock x:Name="TxtMBright" Grid.Row="1" Grid.Column="2" Style="{StaticResource Lbl}"
-                                   HorizontalAlignment="Right"/>
+                        <TextBox x:Name="TxtMBright" Grid.Row="1" Grid.Column="2" Style="{StaticResource ValueInput}" Tag="M-B"/>
 
                         <TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource Lbl}" Text="对比度"/>
                         <Slider x:Name="SldMContrast" Grid.Row="2" Grid.Column="1"
-                                Minimum="-1" Maximum="1" SmallChange="0.01" ValueChanged="OnSliderChanged" Tag="M-C"/>
-                        <TextBlock x:Name="TxtMContrast" Grid.Row="2" Grid.Column="2" Style="{StaticResource Lbl}"
-                                   HorizontalAlignment="Right"/>
+                                Minimum="0.1" Maximum="3" SmallChange="0.01" ValueChanged="OnSliderChanged" Tag="M-C"/>
+                        <TextBox x:Name="TxtMContrast" Grid.Row="2" Grid.Column="2" Style="{StaticResource ValueInput}" Tag="M-C"/>
                     </Grid>
 
                     <!-- RGB 独立通道 -->
@@ -254,69 +260,69 @@
                         <Grid Margin="0,0,0,6" Tag="R">
                             <Grid.RowDefinitions><RowDefinition/><RowDefinition/><RowDefinition/></Grid.RowDefinitions>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="80"/><ColumnDefinition Width="*"/><ColumnDefinition Width="60"/>
+                                <ColumnDefinition Width="80"/><ColumnDefinition Width="*"/><ColumnDefinition Width="76"/>
                             </Grid.ColumnDefinitions>
                             <TextBlock Grid.Row="0" Style="{StaticResource Lbl}" Text="Gamma"/>
                             <Slider x:Name="SldRGamma" Grid.Row="0" Grid.Column="1"
                                     Minimum="0.1" Maximum="4" SmallChange="0.01"
                                     ValueChanged="OnSliderChanged" Tag="R-G"/>
-                            <TextBlock x:Name="TxtRGamma" Grid.Row="0" Grid.Column="2" Style="{StaticResource Lbl}" HorizontalAlignment="Right"/>
+                            <TextBox x:Name="TxtRGamma" Grid.Row="0" Grid.Column="2" Style="{StaticResource ValueInput}" Tag="R-G"/>
                             <TextBlock Grid.Row="1" Style="{StaticResource Lbl}" Text="亮度"/>
                             <Slider x:Name="SldRBright" Grid.Row="1" Grid.Column="1"
                                     Minimum="-1" Maximum="1" SmallChange="0.01"
                                     ValueChanged="OnSliderChanged" Tag="R-B"/>
-                            <TextBlock x:Name="TxtRBright" Grid.Row="1" Grid.Column="2" Style="{StaticResource Lbl}" HorizontalAlignment="Right"/>
+                            <TextBox x:Name="TxtRBright" Grid.Row="1" Grid.Column="2" Style="{StaticResource ValueInput}" Tag="R-B"/>
                             <TextBlock Grid.Row="2" Style="{StaticResource Lbl}" Text="对比度"/>
                             <Slider x:Name="SldRContrast" Grid.Row="2" Grid.Column="1"
-                                    Minimum="-1" Maximum="1" SmallChange="0.01"
+                                    Minimum="0.1" Maximum="3" SmallChange="0.01"
                                     ValueChanged="OnSliderChanged" Tag="R-C"/>
-                            <TextBlock x:Name="TxtRContrast" Grid.Row="2" Grid.Column="2" Style="{StaticResource Lbl}" HorizontalAlignment="Right"/>
+                            <TextBox x:Name="TxtRContrast" Grid.Row="2" Grid.Column="2" Style="{StaticResource ValueInput}" Tag="R-C"/>
                         </Grid>
 
                         <TextBlock Style="{StaticResource GroupHeader}" Text="● 绿色通道" Foreground="#60FF60"/>
                         <Grid Margin="0,0,0,6" Tag="G">
                             <Grid.RowDefinitions><RowDefinition/><RowDefinition/><RowDefinition/></Grid.RowDefinitions>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="80"/><ColumnDefinition Width="*"/><ColumnDefinition Width="60"/>
+                                <ColumnDefinition Width="80"/><ColumnDefinition Width="*"/><ColumnDefinition Width="76"/>
                             </Grid.ColumnDefinitions>
                             <TextBlock Grid.Row="0" Style="{StaticResource Lbl}" Text="Gamma"/>
                             <Slider x:Name="SldGGamma" Grid.Row="0" Grid.Column="1"
                                     Minimum="0.1" Maximum="4" SmallChange="0.01"
                                     ValueChanged="OnSliderChanged" Tag="G-G"/>
-                            <TextBlock x:Name="TxtGGamma" Grid.Row="0" Grid.Column="2" Style="{StaticResource Lbl}" HorizontalAlignment="Right"/>
+                            <TextBox x:Name="TxtGGamma" Grid.Row="0" Grid.Column="2" Style="{StaticResource ValueInput}" Tag="G-G"/>
                             <TextBlock Grid.Row="1" Style="{StaticResource Lbl}" Text="亮度"/>
                             <Slider x:Name="SldGBright" Grid.Row="1" Grid.Column="1"
                                     Minimum="-1" Maximum="1" SmallChange="0.01"
                                     ValueChanged="OnSliderChanged" Tag="G-B"/>
-                            <TextBlock x:Name="TxtGBright" Grid.Row="1" Grid.Column="2" Style="{StaticResource Lbl}" HorizontalAlignment="Right"/>
+                            <TextBox x:Name="TxtGBright" Grid.Row="1" Grid.Column="2" Style="{StaticResource ValueInput}" Tag="G-B"/>
                             <TextBlock Grid.Row="2" Style="{StaticResource Lbl}" Text="对比度"/>
                             <Slider x:Name="SldGContrast" Grid.Row="2" Grid.Column="1"
-                                    Minimum="-1" Maximum="1" SmallChange="0.01"
+                                    Minimum="0.1" Maximum="3" SmallChange="0.01"
                                     ValueChanged="OnSliderChanged" Tag="G-C"/>
-                            <TextBlock x:Name="TxtGContrast" Grid.Row="2" Grid.Column="2" Style="{StaticResource Lbl}" HorizontalAlignment="Right"/>
+                            <TextBox x:Name="TxtGContrast" Grid.Row="2" Grid.Column="2" Style="{StaticResource ValueInput}" Tag="G-C"/>
                         </Grid>
 
                         <TextBlock Style="{StaticResource GroupHeader}" Text="● 蓝色通道" Foreground="#6096FF"/>
                         <Grid Margin="0,0,0,6" Tag="B">
                             <Grid.RowDefinitions><RowDefinition/><RowDefinition/><RowDefinition/></Grid.RowDefinitions>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="80"/><ColumnDefinition Width="*"/><ColumnDefinition Width="60"/>
+                                <ColumnDefinition Width="80"/><ColumnDefinition Width="*"/><ColumnDefinition Width="76"/>
                             </Grid.ColumnDefinitions>
                             <TextBlock Grid.Row="0" Style="{StaticResource Lbl}" Text="Gamma"/>
                             <Slider x:Name="SldBGamma" Grid.Row="0" Grid.Column="1"
                                     Minimum="0.1" Maximum="4" SmallChange="0.01"
                                     ValueChanged="OnSliderChanged" Tag="B-G"/>
-                            <TextBlock x:Name="TxtBGamma" Grid.Row="0" Grid.Column="2" Style="{StaticResource Lbl}" HorizontalAlignment="Right"/>
+                            <TextBox x:Name="TxtBGamma" Grid.Row="0" Grid.Column="2" Style="{StaticResource ValueInput}" Tag="B-G"/>
                             <TextBlock Grid.Row="1" Style="{StaticResource Lbl}" Text="亮度"/>
                             <Slider x:Name="SldBBright" Grid.Row="1" Grid.Column="1"
                                     Minimum="-1" Maximum="1" SmallChange="0.01"
                                     ValueChanged="OnSliderChanged" Tag="B-B"/>
-                            <TextBlock x:Name="TxtBBright" Grid.Row="1" Grid.Column="2" Style="{StaticResource Lbl}" HorizontalAlignment="Right"/>
+                            <TextBox x:Name="TxtBBright" Grid.Row="1" Grid.Column="2" Style="{StaticResource ValueInput}" Tag="B-B"/>
                             <TextBlock Grid.Row="2" Style="{StaticResource Lbl}" Text="对比度"/>
                             <Slider x:Name="SldBContrast" Grid.Row="2" Grid.Column="1"
-                                    Minimum="-1" Maximum="1" SmallChange="0.01"
+                                    Minimum="0.1" Maximum="3" SmallChange="0.01"
                                     ValueChanged="OnSliderChanged" Tag="B-C"/>
-                            <TextBlock x:Name="TxtBContrast" Grid.Row="2" Grid.Column="2" Style="{StaticResource Lbl}" HorizontalAlignment="Right"/>
+                            <TextBox x:Name="TxtBContrast" Grid.Row="2" Grid.Column="2" Style="{StaticResource ValueInput}" Tag="B-C"/>
                         </Grid>
                     </StackPanel>
 

@@ -1,5 +1,7 @@
+using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using FPSToolbox.Shared.Ipc;
 using GammaTool.Core;
 using GammaTool.Models;
@@ -36,6 +38,19 @@ public partial class GammaPanelWindow : Window
         _schemes = schemes;
         _ipc = ipc;
 
+        WireValueInput(TxtMGamma,    SldMGamma,    ChannelParams.GammaMin,    ChannelParams.GammaMax);
+        WireValueInput(TxtMBright,   SldMBright,   ChannelParams.BrightMin,   ChannelParams.BrightMax);
+        WireValueInput(TxtMContrast, SldMContrast, ChannelParams.ContrastMin, ChannelParams.ContrastMax);
+        WireValueInput(TxtRGamma,    SldRGamma,    ChannelParams.GammaMin,    ChannelParams.GammaMax);
+        WireValueInput(TxtRBright,   SldRBright,   ChannelParams.BrightMin,   ChannelParams.BrightMax);
+        WireValueInput(TxtRContrast, SldRContrast, ChannelParams.ContrastMin, ChannelParams.ContrastMax);
+        WireValueInput(TxtGGamma,    SldGGamma,    ChannelParams.GammaMin,    ChannelParams.GammaMax);
+        WireValueInput(TxtGBright,   SldGBright,   ChannelParams.BrightMin,   ChannelParams.BrightMax);
+        WireValueInput(TxtGContrast, SldGContrast, ChannelParams.ContrastMin, ChannelParams.ContrastMax);
+        WireValueInput(TxtBGamma,    SldBGamma,    ChannelParams.GammaMin,    ChannelParams.GammaMax);
+        WireValueInput(TxtBBright,   SldBBright,   ChannelParams.BrightMin,   ChannelParams.BrightMax);
+        WireValueInput(TxtBContrast, SldBContrast, ChannelParams.ContrastMin, ChannelParams.ContrastMax);
+
         Loaded += OnLoaded;
         Closing += (_, _) =>
         {
@@ -43,6 +58,38 @@ public partial class GammaPanelWindow : Window
             System.Windows.Application.Current.Shutdown();
         };
     }
+
+    /// <summary>把数字输入框与对应的滑块做双向绑定,带范围钳制。</summary>
+    private void WireValueInput(TextBox box, Slider slider, double min, double max)
+    {
+        void Commit()
+        {
+            var txt = (box.Text ?? "").Trim();
+            if (!double.TryParse(txt, NumberStyles.Float, CultureInfo.InvariantCulture, out var v) &&
+                !double.TryParse(txt, NumberStyles.Float, CultureInfo.CurrentCulture, out v))
+            {
+                // 解析失败:还原为滑块当前值
+                box.Text = FormatValue(slider.Value);
+                return;
+            }
+            if (v < min) v = min;
+            if (v > max) v = max;
+            slider.Value = v;  // 触发 OnSliderChanged → 统一回写
+        }
+
+        box.LostFocus += (_, _) => Commit();
+        box.KeyDown += (_, e) =>
+        {
+            if (e.Key == Key.Enter)
+            {
+                Commit();
+                Keyboard.ClearFocus();
+                e.Handled = true;
+            }
+        };
+    }
+
+    private static string FormatValue(double v) => v.ToString("0.00", CultureInfo.InvariantCulture);
 
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
@@ -54,7 +101,33 @@ public partial class GammaPanelWindow : Window
         CmbMonitors.SelectedIndex = 0;
 
         ReloadSchemes();
-        _editingConfig = _currentAppliedConfig.Clone();
+
+        // 默认选中「三角洲-黑夜」(首次运行时由 SchemeManager 自动种入)
+        var cfg = _schemes.LoadConfig();
+        var defaultName = cfg.LastSchemeName;
+        if (string.IsNullOrWhiteSpace(defaultName))
+            defaultName = _loadedSchemes.Any(s => s.Name == BuiltInSchemes.DeltaNight)
+                ? BuiltInSchemes.DeltaNight
+                : _loadedSchemes.FirstOrDefault()?.Name;
+
+        if (!string.IsNullOrEmpty(defaultName) &&
+            _loadedSchemes.FirstOrDefault(s => s.Name == defaultName) is { } scheme)
+        {
+            _editingConfig = scheme.Config.Clone();
+            _currentAppliedConfig = scheme.Config.Clone();
+            _suppressEvents = true;
+            try { CmbSchemes.Text = defaultName; }
+            finally { _suppressEvents = false; }
+
+            // 应用到屏幕,让用户启动即看到默认方案生效
+            ApplyToScreen(_currentAppliedConfig);
+            TxtStatus.Text = $"已应用默认方案:{defaultName}";
+        }
+        else
+        {
+            _editingConfig = _currentAppliedConfig.Clone();
+        }
+
         PushConfigToUI(_editingConfig);
         UpdateCurve();
         UpdatePreviewStateUi();
@@ -95,18 +168,18 @@ public partial class GammaPanelWindow : Window
 
     private void RefreshAllValueLabels()
     {
-        TxtMGamma.Text = SldMGamma.Value.ToString("0.00");
-        TxtMBright.Text = SldMBright.Value.ToString("+0.00;-0.00;0.00");
-        TxtMContrast.Text = SldMContrast.Value.ToString("+0.00;-0.00;0.00");
-        TxtRGamma.Text = SldRGamma.Value.ToString("0.00");
-        TxtRBright.Text = SldRBright.Value.ToString("+0.00;-0.00;0.00");
-        TxtRContrast.Text = SldRContrast.Value.ToString("+0.00;-0.00;0.00");
-        TxtGGamma.Text = SldGGamma.Value.ToString("0.00");
-        TxtGBright.Text = SldGBright.Value.ToString("+0.00;-0.00;0.00");
-        TxtGContrast.Text = SldGContrast.Value.ToString("+0.00;-0.00;0.00");
-        TxtBGamma.Text = SldBGamma.Value.ToString("0.00");
-        TxtBBright.Text = SldBBright.Value.ToString("+0.00;-0.00;0.00");
-        TxtBContrast.Text = SldBContrast.Value.ToString("+0.00;-0.00;0.00");
+        TxtMGamma.Text    = FormatValue(SldMGamma.Value);
+        TxtMBright.Text   = FormatValue(SldMBright.Value);
+        TxtMContrast.Text = FormatValue(SldMContrast.Value);
+        TxtRGamma.Text    = FormatValue(SldRGamma.Value);
+        TxtRBright.Text   = FormatValue(SldRBright.Value);
+        TxtRContrast.Text = FormatValue(SldRContrast.Value);
+        TxtGGamma.Text    = FormatValue(SldGGamma.Value);
+        TxtGBright.Text   = FormatValue(SldGBright.Value);
+        TxtGContrast.Text = FormatValue(SldGContrast.Value);
+        TxtBGamma.Text    = FormatValue(SldBGamma.Value);
+        TxtBBright.Text   = FormatValue(SldBBright.Value);
+        TxtBContrast.Text = FormatValue(SldBContrast.Value);
     }
 
     private void PullUIToConfig()
@@ -287,6 +360,11 @@ public partial class GammaPanelWindow : Window
         ReloadSchemes();
         CmbSchemes.Text = name;
         TxtStatus.Text = $"方案已保存并应用：{name}";
+
+        // 记住作为下次启动的默认
+        var cfg = _schemes.LoadConfig();
+        cfg.LastSchemeName = name;
+        _schemes.SaveConfig(cfg);
 
         _ = _ipc?.SendEventAsync(IpcTopics.GammaSchemeApplied, new { name });
         _ = _ipc?.SendEventAsync(IpcTopics.GammaSchemesChanged);
