@@ -102,8 +102,11 @@ public partial class MainWindow : Window
         {
             if (!string.IsNullOrEmpty(_latestUpdate.ErrorMessage))
             {
-                MessageBox.Show(this, $"检查更新失败：{_latestUpdate.ErrorMessage}",
-                    "FPS 工具箱", MessageBoxButton.OK, MessageBoxImage.Warning);
+                var msg = _latestUpdate.ErrorMessage;
+                if (!string.IsNullOrEmpty(_latestUpdate.ErrorDetail))
+                    msg += $"\n\n[详细信息] {_latestUpdate.ErrorDetail}";
+                MessageBox.Show(this, msg,
+                    "FPS 工具箱", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
             if (!_latestUpdate.Toolbox.HasUpdate

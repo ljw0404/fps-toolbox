@@ -7,8 +7,8 @@ public static class UpdateConstants
 {
     // ──────────────────────────────────────────────────────────────
     // ▼▼▼ 仓库配置(迁仓库只改这两行) ▼▼▼
-    public const string GitHubOwner = "LiveAckerman";
-    public const string GitHubRepo = "game-aiming";
+    public const string GitHubOwner = "ljw0404";
+    public const string GitHubRepo = "fps-toolbox";
     // ▲▲▲
 
     public const string ApiBase = "https://api.github.com";

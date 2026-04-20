@@ -138,7 +138,7 @@ public class TrayIconManager : IDisposable
             {
                 System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
                 {
-                    FileName = "https://github.com/LiveAckerman/game-aiming",
+                    FileName = "https://github.com/ljw0404/fps-toolbox",
                     UseShellExecute = true,
                 });
             }

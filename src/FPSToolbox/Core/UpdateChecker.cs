@@ -32,11 +32,23 @@ public class UpdateChecker
         var result = new UpdateCheckResult();
         try
         {
-            var releases = await _http.GetFromJsonAsync<List<GhRelease>>(
-                UpdateConstants.ReleasesListEndpoint, ct);
-            if (releases == null)
+            using var resp = await _http.GetAsync(
+                UpdateConstants.ReleasesListEndpoint,
+                HttpCompletionOption.ResponseHeadersRead, ct);
+
+            // 404 / 403 / 其他非成功状态码单独给出人话
+            if (!resp.IsSuccessStatusCode)
             {
-                result.ErrorMessage = "GitHub API 返回空";
+                result.ErrorMessage = MapHttpStatusToFriendly(resp.StatusCode);
+                result.ErrorDetail = $"HTTP {(int)resp.StatusCode} {resp.ReasonPhrase} @ {UpdateConstants.ReleasesListEndpoint}";
+                return result;
+            }
+
+            var releases = await resp.Content.ReadFromJsonAsync<List<GhRelease>>(cancellationToken: ct);
+            if (releases == null || releases.Count == 0)
+            {
+                result.ErrorMessage = "仓库还没有发布任何版本，暂时无法检查更新。";
+                result.ErrorDetail = "Releases list empty";
                 return result;
             }
 
@@ -51,12 +63,36 @@ public class UpdateChecker
             result.Gamma = BuildToolInfo(ToolIds.GammaTool, "屏幕调节工具",
                 gammaLatest, UpdateConstants.AssetNamePattern.GammaZip);
         }
+        catch (TaskCanceledException)
+        {
+            result.ErrorMessage = "检查更新超时，请检查网络后重试。";
+            result.ErrorDetail = "Request timeout";
+        }
+        catch (HttpRequestException ex)
+        {
+            result.ErrorMessage = "无法连接到 GitHub，请检查网络连接后重试。";
+            result.ErrorDetail = ex.Message;
+        }
         catch (Exception ex)
         {
-            result.ErrorMessage = ex.Message;
+            result.ErrorMessage = "检查更新时发生未知错误。";
+            result.ErrorDetail = ex.ToString();
         }
         return result;
     }
+
+    private static string MapHttpStatusToFriendly(System.Net.HttpStatusCode code) => code switch
+    {
+        // 仓库不存在、没公开、或尚未发布任何 Release
+        System.Net.HttpStatusCode.NotFound =>
+            "暂时获取不到版本信息，当前可能已是最新版本（或发布渠道尚未就绪）。",
+        // GitHub 匿名 API 一小时 60 次上限
+        System.Net.HttpStatusCode.Forbidden =>
+            "GitHub 访问频率过高，请稍后再试。",
+        System.Net.HttpStatusCode.ServiceUnavailable =>
+            "GitHub 服务暂时不可用，请稍后再试。",
+        _ => $"检查更新失败（HTTP {(int)code}），请稍后再试。",
+    };
 
     private ComponentUpdateInfo BuildToolboxInfo(GhRelease? release)
     {

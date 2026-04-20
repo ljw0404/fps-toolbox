@@ -19,7 +19,7 @@
 #define AppName      "FPS 工具箱"
 #define AppId        "FPSToolbox"
 #define AppPublisher "FPSToolbox"
-#define AppURL       "https://github.com/LiveAckerman/game-aiming"
+#define AppURL       "https://github.com/ljw0404/fps-toolbox"
 #define AppExeName   "FPSToolbox.exe"
 #define SourceDir    "..\dist\payload"
 

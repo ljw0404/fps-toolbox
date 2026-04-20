@@ -39,5 +39,10 @@ public class UpdateCheckResult
     public ComponentUpdateInfo Crosshair { get; set; } = new();
     public ComponentUpdateInfo Gamma { get; set; } = new();
     public DateTime CheckedAt { get; set; } = DateTime.Now;
+
+    /// <summary>用户可读的错误提示（已本地化、无技术细节）。null 表示成功。</summary>
     public string? ErrorMessage { get; set; }
+
+    /// <summary>面向开发者的原始错误信息，用于日志排查。</summary>
+    public string? ErrorDetail { get; set; }
 }

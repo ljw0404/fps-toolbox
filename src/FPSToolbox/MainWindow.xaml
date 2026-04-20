@@ -86,7 +86,7 @@
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
                     <TextBlock Foreground="#666" VerticalAlignment="Center">
-                        <Hyperlink x:Name="LnkGithub" NavigateUri="https://github.com/LiveAckerman/game-aiming"
+                        <Hyperlink x:Name="LnkGithub" NavigateUri="https://github.com/ljw0404/fps-toolbox"
                                    RequestNavigate="OnGithubLinkClicked"
                                    Foreground="#4EC9B0" TextDecorations="None">
                             <Run Text="⭐ GitHub 开源地址"/>
