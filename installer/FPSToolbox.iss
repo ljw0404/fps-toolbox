@@ -67,14 +67,15 @@ Name: "chinesesimplified"; MessagesFile: "Languages\ChineseSimplified.isl"
 Name: "english";           MessagesFile: "compiler:Default.isl"
 
 [Types]
-Name: "full";    Description: "完整安装（主程序 + 两个工具）"
+Name: "full";    Description: "完整安装（主程序 + 三个工具）"
 Name: "compact"; Description: "最小安装（仅主程序）"
 Name: "custom";  Description: "自定义安装";                       Flags: iscustom
 
 [Components]
-Name: "main";      Description: "FPS 工具箱主程序（必需）"; Types: full compact custom; Flags: fixed
-Name: "crosshair"; Description: "屏幕准心工具";            Types: full
-Name: "gamma";     Description: "屏幕调节工具";            Types: full
+Name: "main";        Description: "FPS 工具箱主程序（必需）"; Types: full compact custom; Flags: fixed
+Name: "crosshair";   Description: "屏幕准心工具";            Types: full
+Name: "gamma";       Description: "屏幕调节工具";            Types: full
+Name: "nightvision"; Description: "智能夜视滤镜";            Types: full
 
 [Tasks]
 Name: "desktopicon";  Description: "创建桌面快捷方式"; GroupDescription: "附加图标:"; Flags: unchecked
@@ -97,6 +98,10 @@ Source: "{#SourceDir}\tools\CrosshairTool\*"; DestDir: "{app}\tools\CrosshairToo
 ; 屏幕调节工具(同上)
 Source: "{#SourceDir}\tools\GammaTool\*"; DestDir: "{app}\tools\GammaTool"; \
     Flags: ignoreversion recursesubdirs createallsubdirs uninsneveruninstall; Components: gamma
+
+; 智能夜视滤镜(同上)
+Source: "{#SourceDir}\tools\NightVisionTool\*"; DestDir: "{app}\tools\NightVisionTool"; \
+    Flags: ignoreversion recursesubdirs createallsubdirs uninsneveruninstall; Components: nightvision
 
 #ifdef OFFLINE
 ; 离线版:内嵌 .NET Desktop Runtime 安装器
@@ -131,6 +136,7 @@ Filename: "{app}\{#AppExeName}"; Flags: nowait runasoriginaluser; Check: WizardS
 Filename: "taskkill.exe"; Parameters: "/f /im FPSToolbox.exe";   Flags: runhidden; RunOnceId: "KillMain"
 Filename: "taskkill.exe"; Parameters: "/f /im CrosshairTool.exe"; Flags: runhidden; RunOnceId: "KillCross"
 Filename: "taskkill.exe"; Parameters: "/f /im GammaTool.exe";     Flags: runhidden; RunOnceId: "KillGamma"
+Filename: "taskkill.exe"; Parameters: "/f /im NightVisionTool.exe"; Flags: runhidden; RunOnceId: "KillNight"
 
 [Code]
 #ifndef OFFLINE
@@ -232,9 +238,10 @@ var
 begin
   if CurStep = ssInstall then
   begin
-    Exec('taskkill.exe', '/f /im FPSToolbox.exe',   '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
-    Exec('taskkill.exe', '/f /im CrosshairTool.exe', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
-    Exec('taskkill.exe', '/f /im GammaTool.exe',     '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+    Exec('taskkill.exe', '/f /im FPSToolbox.exe',      '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+    Exec('taskkill.exe', '/f /im CrosshairTool.exe',   '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+    Exec('taskkill.exe', '/f /im GammaTool.exe',       '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+    Exec('taskkill.exe', '/f /im NightVisionTool.exe', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
 
     if NeedsDotNet() then
     begin
@@ -256,9 +263,10 @@ var
 begin
   if CurStep = ssInstall then
   begin
-    Exec('taskkill.exe', '/f /im FPSToolbox.exe',   '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
-    Exec('taskkill.exe', '/f /im CrosshairTool.exe', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
-    Exec('taskkill.exe', '/f /im GammaTool.exe',     '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+    Exec('taskkill.exe', '/f /im FPSToolbox.exe',      '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+    Exec('taskkill.exe', '/f /im CrosshairTool.exe',   '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+    Exec('taskkill.exe', '/f /im GammaTool.exe',       '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+    Exec('taskkill.exe', '/f /im NightVisionTool.exe', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
   end;
 end;
 #endif
@@ -271,12 +279,13 @@ procedure AutoCheckExistingTools;
 var
   I: Integer;
   AppDir, Desc: String;
-  HasCrosshair, HasGamma: Boolean;
+  HasCrosshair, HasGamma, HasNight: Boolean;
 begin
   AppDir := WizardForm.DirEdit.Text;
   HasCrosshair := FileExists(AppDir + '\tools\CrosshairTool\CrosshairTool.exe');
   HasGamma     := FileExists(AppDir + '\tools\GammaTool\GammaTool.exe');
-  if (not HasCrosshair) and (not HasGamma) then Exit;
+  HasNight     := FileExists(AppDir + '\tools\NightVisionTool\NightVisionTool.exe');
+  if (not HasCrosshair) and (not HasGamma) and (not HasNight) then Exit;
 
   for I := 0 to WizardForm.ComponentsList.Items.Count - 1 do
   begin
@@ -284,6 +293,8 @@ begin
     if HasCrosshair and (Pos('准心', Desc) > 0) then
       WizardForm.ComponentsList.Checked[I] := True;
     if HasGamma and (Pos('调节', Desc) > 0) then
+      WizardForm.ComponentsList.Checked[I] := True;
+    if HasNight and (Pos('夜视', Desc) > 0) then
       WizardForm.ComponentsList.Checked[I] := True;
   end;
 end;
@@ -300,19 +311,22 @@ end;
 var
   UninstCrosshair: Boolean;
   UninstGamma: Boolean;
+  UninstNight: Boolean;
 
 function InitializeUninstall(): Boolean;
 var
   ToolsRoot: String;
-  HasCrosshair, HasGamma: Boolean;
+  HasCrosshair, HasGamma, HasNight: Boolean;
 begin
   Result := True;
   UninstCrosshair := False;
   UninstGamma := False;
+  UninstNight := False;
 
   ToolsRoot := ExpandConstant('{app}\tools');
   HasCrosshair := DirExists(ToolsRoot + '\CrosshairTool');
   HasGamma     := DirExists(ToolsRoot + '\GammaTool');
+  HasNight     := DirExists(ToolsRoot + '\NightVisionTool');
 
   if HasCrosshair then
     UninstCrosshair := (MsgBox(
@@ -329,6 +343,14 @@ begin
       '选择"是"：删除该工具的所有文件。' + #13#10 +
       '选择"否"：保留该工具的文件（下次安装 FPS 工具箱后可直接使用）。',
       mbConfirmation, MB_YESNO or MB_DEFBUTTON2) = IDYES);
+
+  if HasNight then
+    UninstNight := (MsgBox(
+      '是否同时卸载「智能夜视滤镜」？' + #13#10 + #13#10 +
+      '安装位置：' + ToolsRoot + '\NightVisionTool' + #13#10 + #13#10 +
+      '选择"是"：删除该工具的所有文件。' + #13#10 +
+      '选择"否"：保留该工具的文件（下次安装 FPS 工具箱后可直接使用）。',
+      mbConfirmation, MB_YESNO or MB_DEFBUTTON2) = IDYES);
 end;
 
 procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
@@ -339,10 +361,11 @@ begin
   if CurUninstallStep = usUninstall then
   begin
     AppPath := ExpandConstant('{app}');
-    if UninstCrosshair then DelTree(AppPath + '\tools\CrosshairTool', True, True, True);
-    if UninstGamma     then DelTree(AppPath + '\tools\GammaTool',     True, True, True);
-    // 若两个子工具都删了,顺手把空的 tools\ 目录也清掉
-    if UninstCrosshair and UninstGamma then
+    if UninstCrosshair then DelTree(AppPath + '\tools\CrosshairTool',   True, True, True);
+    if UninstGamma     then DelTree(AppPath + '\tools\GammaTool',       True, True, True);
+    if UninstNight     then DelTree(AppPath + '\tools\NightVisionTool', True, True, True);
+    // 若三个子工具都删了,顺手把空的 tools\ 目录也清掉
+    if UninstCrosshair and UninstGamma and UninstNight then
       RemoveDir(AppPath + '\tools');
   end;
   if CurUninstallStep = usPostUninstall then

@@ -41,7 +41,7 @@ public static class ToolPackageInstaller
 
         if (!ToolIds.IsKnown(manifest.Name))
             throw new InvalidOperationException(
-                $"未知工具：{manifest.Name}（仅支持 CrosshairTool / GammaTool）");
+                $"未知工具：{manifest.Name}（仅支持 CrosshairTool / GammaTool / NightVisionTool）");
 
         if (string.IsNullOrEmpty(manifest.ExeName))
             throw new InvalidDataException("manifest.exeName 为空");

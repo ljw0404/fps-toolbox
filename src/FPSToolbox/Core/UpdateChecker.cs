@@ -56,12 +56,15 @@ public class UpdateChecker
             var toolboxLatest = PickLatest(releases, UpdateConstants.TagPrefix.Toolbox);
             var crosshairLatest = PickLatest(releases, UpdateConstants.TagPrefix.Crosshair);
             var gammaLatest = PickLatest(releases, UpdateConstants.TagPrefix.Gamma);
+            var nightVisionLatest = PickLatest(releases, UpdateConstants.TagPrefix.NightVision);
 
             result.Toolbox = BuildToolboxInfo(toolboxLatest);
             result.Crosshair = BuildToolInfo(ToolIds.CrosshairTool, "屏幕准心工具",
-                crosshairLatest, UpdateConstants.AssetNamePattern.CrosshairZip);
+                crosshairLatest, UpdateConstants.TagPrefix.Crosshair, UpdateConstants.AssetNamePattern.CrosshairZip);
             result.Gamma = BuildToolInfo(ToolIds.GammaTool, "屏幕调节工具",
-                gammaLatest, UpdateConstants.AssetNamePattern.GammaZip);
+                gammaLatest, UpdateConstants.TagPrefix.Gamma, UpdateConstants.AssetNamePattern.GammaZip);
+            result.NightVision = BuildToolInfo(ToolIds.NightVisionTool, "智能夜视滤镜",
+                nightVisionLatest, UpdateConstants.TagPrefix.NightVision, UpdateConstants.AssetNamePattern.NightVisionZip);
         }
         catch (TaskCanceledException)
         {
@@ -117,7 +120,7 @@ public class UpdateChecker
     }
 
     private ComponentUpdateInfo BuildToolInfo(string toolId, string displayName,
-        GhRelease? release, string zipPattern)
+        GhRelease? release, string prefix, string zipPattern)
     {
         var installed = _registry.Get(toolId);
         var info = new ComponentUpdateInfo
@@ -128,9 +131,6 @@ public class UpdateChecker
         };
         if (release == null) return info;
 
-        var prefix = toolId == ToolIds.CrosshairTool
-            ? UpdateConstants.TagPrefix.Crosshair
-            : UpdateConstants.TagPrefix.Gamma;
         info.LatestVersion = StripPrefix(release.TagName, prefix);
         info.ReleaseNotes = release.Body;
         info.PublishedAt = release.PublishedAt;

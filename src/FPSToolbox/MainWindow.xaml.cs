@@ -111,7 +111,8 @@ public partial class MainWindow : Window
             }
             if (!_latestUpdate.Toolbox.HasUpdate
                 && !_latestUpdate.Crosshair.HasUpdate
-                && !_latestUpdate.Gamma.HasUpdate)
+                && !_latestUpdate.Gamma.HasUpdate
+                && !_latestUpdate.NightVision.HasUpdate)
             {
                 MessageBox.Show(this, "当前已是最新版本。",
                     "FPS 工具箱", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -356,6 +357,7 @@ public partial class MainWindow : Window
         {
             ToolIds.CrosshairTool => _latestUpdate.Crosshair,
             ToolIds.GammaTool => _latestUpdate.Gamma,
+            ToolIds.NightVisionTool => _latestUpdate.NightVision,
             _ => null,
         };
     }
@@ -436,16 +438,19 @@ public partial class MainWindow : Window
                 case ToolRuntimeState.Running:
                     var openSettings = new Button
                     {
-                        Content = name == ToolIds.GammaTool ? "打开面板" : "打开设置"
+                        Content = name == ToolIds.CrosshairTool ? "打开设置" : "打开面板"
                     };
                     openSettings.Click += async (_, _) =>
                     {
                         var session = _toolManager.Get(name).Session;
                         if (session != null)
                         {
-                            var action = name == ToolIds.GammaTool
-                                ? IpcActions.GammaOpenPanel
-                                : IpcActions.CrosshairOpenSettings;
+                            var action = name switch
+                            {
+                                ToolIds.GammaTool => IpcActions.GammaOpenPanel,
+                                ToolIds.NightVisionTool => IpcActions.NightVisionOpenPanel,
+                                _ => IpcActions.CrosshairOpenSettings,
+                            };
                             try { await session.SendRequestAsync(action, timeout: TimeSpan.FromSeconds(2)); }
                             catch { }
                         }

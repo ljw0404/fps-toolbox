@@ -22,6 +22,7 @@ public class ToolRegistry
     // ──────────────────────────────────────────────────────────────
     private const string FallbackCrosshairVersion = "1.0.0";
     private const string FallbackGammaVersion = "1.1.0";
+    private const string FallbackNightVisionVersion = "0.1.0";
     private static string ToolZipUrl(string prefix, string toolName, string version) =>
         $"https://github.com/{UpdateConstants.GitHubOwner}/{UpdateConstants.GitHubRepo}/releases/download/{prefix}v{version}/{toolName}-v{version}.zip";
 
@@ -42,6 +43,14 @@ public class ToolRegistry
             Description = "复刻 Gamma Panel 的屏幕灰度 / 亮度 / 对比度调节工具，支持 RGB 通道独立、LUT 曲线预览和配色方案。",
             DefaultExeRelativePath = @"tools\GammaTool\GammaTool.exe",
             DownloadUrl = ToolZipUrl(UpdateConstants.TagPrefix.Gamma, "GammaTool", FallbackGammaVersion),
+        },
+        new ToolDescriptor
+        {
+            Name = ToolIds.NightVisionTool,
+            DisplayName = "智能夜视滤镜",
+            Description = "针对黑夜场景的智能屏幕滤镜:暗部提亮 + 亮部保护,走进室内光源不再过曝。只用系统 LUT,不注入游戏。",
+            DefaultExeRelativePath = @"tools\NightVisionTool\NightVisionTool.exe",
+            DownloadUrl = ToolZipUrl(UpdateConstants.TagPrefix.NightVision, "NightVisionTool", FallbackNightVisionVersion),
         },
     };
 

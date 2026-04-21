@@ -27,6 +27,7 @@ public static class UpdateConstants
         public const string Toolbox = "toolbox-v";
         public const string Crosshair = "crosshair-v";
         public const string Gamma = "gamma-v";
+        public const string NightVision = "nightvision-v";
     }
 
     /// <summary>
@@ -37,6 +38,7 @@ public static class UpdateConstants
         public const string Toolbox = "Toolbox";
         public const string CrosshairTool = "CrosshairTool";
         public const string GammaTool = "GammaTool";
+        public const string NightVisionTool = "NightVisionTool";
     }
 
     /// <summary>
@@ -48,5 +50,6 @@ public static class UpdateConstants
         public const string ToolboxOfflineExe = "FPSToolbox_Setup_v*_offline.exe"; // 离线版(~60MB)
         public const string CrosshairZip = "CrosshairTool-v*.zip";
         public const string GammaZip = "GammaTool-v*.zip";
+        public const string NightVisionZip = "NightVisionTool-v*.zip";
     }
 }

@@ -65,6 +65,7 @@ public class TrayIconManager : IDisposable
     private ToolStripMenuItem? _crosshairRoot;
     private ToolStripMenuItem? _crosshairToggle;
     private ToolStripMenuItem? _gammaRoot;
+    private ToolStripMenuItem? _nightVisionRoot;
 
     public TrayIconManager(ToolManager tm, ToolRegistry registry,
         Action onShowMain, Action onExitAll)
@@ -130,6 +131,21 @@ public class TrayIconManager : IDisposable
             async (_, _) => await _toolManager.StopAsync(ToolIds.GammaTool));
         menu.Items.Add(_gammaRoot);
 
+        // ── 智能夜视滤镜 ──
+        _nightVisionRoot = new ToolStripMenuItem("智能夜视滤镜");
+        _nightVisionRoot.DropDownItems.Add("打开面板...", null,
+            (_, _) => SendAsync(ToolIds.NightVisionTool, IpcActions.NightVisionOpenPanel));
+        _nightVisionRoot.DropDownItems.Add("开启 / 关闭夜视", null,
+            (_, _) => SendAsync(ToolIds.NightVisionTool, IpcActions.NightVisionToggle));
+        _nightVisionRoot.DropDownItems.Add("重置为系统默认", null,
+            (_, _) => SendAsync(ToolIds.NightVisionTool, IpcActions.NightVisionResetSystem));
+        _nightVisionRoot.DropDownItems.Add(new ToolStripSeparator());
+        _nightVisionRoot.DropDownItems.Add("启动", null,
+            (_, _) => _toolManager.Start(ToolIds.NightVisionTool));
+        _nightVisionRoot.DropDownItems.Add("停止", null,
+            async (_, _) => await _toolManager.StopAsync(ToolIds.NightVisionTool));
+        menu.Items.Add(_nightVisionRoot);
+
         menu.Items.Add(new ToolStripSeparator());
         menu.Items.Add("打开主界面", null, (_, _) => _onShowMain());
         menu.Items.Add("GitHub 开源地址", null, (_, _) =>
@@ -165,16 +181,19 @@ public class TrayIconManager : IDisposable
 
     public void RefreshMenu()
     {
-        if (_crosshairRoot == null || _gammaRoot == null) return;
+        if (_crosshairRoot == null || _gammaRoot == null || _nightVisionRoot == null) return;
 
         var cross = _toolManager.Get(ToolIds.CrosshairTool);
         var gamma = _toolManager.Get(ToolIds.GammaTool);
+        var night = _toolManager.Get(ToolIds.NightVisionTool);
 
         _crosshairRoot.Enabled = cross.State != ToolRuntimeState.NotInstalled;
         _gammaRoot.Enabled = gamma.State != ToolRuntimeState.NotInstalled;
+        _nightVisionRoot.Enabled = night.State != ToolRuntimeState.NotInstalled;
 
         _crosshairRoot.Text = $"屏幕准心工具  [{StateToText(cross.State)}]";
         _gammaRoot.Text = $"屏幕调节工具  [{StateToText(gamma.State)}]";
+        _nightVisionRoot.Text = $"智能夜视滤镜  [{StateToText(night.State)}]";
     }
 
     private static string StateToText(ToolRuntimeState s) => s switch

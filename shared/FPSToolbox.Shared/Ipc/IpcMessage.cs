@@ -87,6 +87,13 @@ public static class IpcActions
     public const string GammaApplyPreset = "gamma.applyPreset";
     public const string GammaListSchemes = "gamma.listSchemes";
     public const string GammaResetSystem = "gamma.resetSystem";
+
+    // Toolbox → NightVisionTool
+    public const string NightVisionOpenPanel = "nightVision.openPanel";
+    public const string NightVisionToggle = "nightVision.toggle";
+    public const string NightVisionApplyPreset = "nightVision.applyPreset";
+    public const string NightVisionListSchemes = "nightVision.listSchemes";
+    public const string NightVisionResetSystem = "nightVision.resetSystem";
 }
 
 /// <summary>已知的 Event topic 字符串。</summary>
@@ -101,4 +108,8 @@ public static class IpcTopics
     public const string GammaPreviewState = "gamma.previewState";
     public const string GammaSchemeApplied = "gamma.schemeApplied";
     public const string GammaSchemesChanged = "gamma.schemesChanged";
+
+    public const string NightVisionState = "nightVision.state";
+    public const string NightVisionSchemeApplied = "nightVision.schemeApplied";
+    public const string NightVisionSchemesChanged = "nightVision.schemesChanged";
 }
