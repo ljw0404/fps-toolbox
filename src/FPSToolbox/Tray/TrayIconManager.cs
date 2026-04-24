@@ -66,6 +66,7 @@ public class TrayIconManager : IDisposable
     private ToolStripMenuItem? _crosshairToggle;
     private ToolStripMenuItem? _gammaRoot;
     private ToolStripMenuItem? _nightVisionRoot;
+    private ToolStripMenuItem? _mouseRoot;
 
     public TrayIconManager(ToolManager tm, ToolRegistry registry,
         Action onShowMain, Action onExitAll)
@@ -146,6 +147,19 @@ public class TrayIconManager : IDisposable
             async (_, _) => await _toolManager.StopAsync(ToolIds.NightVisionTool));
         menu.Items.Add(_nightVisionRoot);
 
+        // ── 鼠鼠工具 ──
+        _mouseRoot = new ToolStripMenuItem("🐭 鼠鼠工具");
+        _mouseRoot.DropDownItems.Add("打开设置...", null,
+            (_, _) => SendAsync(ToolIds.MouseTool, IpcActions.MouseToolOpenSettings));
+        _mouseRoot.DropDownItems.Add("显示 / 隐藏悬浮窗", null,
+            (_, _) => SendAsync(ToolIds.MouseTool, IpcActions.MouseToolToggle));
+        _mouseRoot.DropDownItems.Add(new ToolStripSeparator());
+        _mouseRoot.DropDownItems.Add("启动", null,
+            (_, _) => _toolManager.Start(ToolIds.MouseTool));
+        _mouseRoot.DropDownItems.Add("停止", null,
+            async (_, _) => await _toolManager.StopAsync(ToolIds.MouseTool));
+        menu.Items.Add(_mouseRoot);
+
         menu.Items.Add(new ToolStripSeparator());
         menu.Items.Add("打开主界面", null, (_, _) => _onShowMain());
         menu.Items.Add("GitHub 开源地址", null, (_, _) =>
@@ -181,19 +195,22 @@ public class TrayIconManager : IDisposable
 
     public void RefreshMenu()
     {
-        if (_crosshairRoot == null || _gammaRoot == null || _nightVisionRoot == null) return;
+        if (_crosshairRoot == null || _gammaRoot == null || _nightVisionRoot == null || _mouseRoot == null) return;
 
         var cross = _toolManager.Get(ToolIds.CrosshairTool);
         var gamma = _toolManager.Get(ToolIds.GammaTool);
         var night = _toolManager.Get(ToolIds.NightVisionTool);
+        var mouse = _toolManager.Get(ToolIds.MouseTool);
 
         _crosshairRoot.Enabled = cross.State != ToolRuntimeState.NotInstalled;
         _gammaRoot.Enabled = gamma.State != ToolRuntimeState.NotInstalled;
         _nightVisionRoot.Enabled = night.State != ToolRuntimeState.NotInstalled;
+        _mouseRoot.Enabled = mouse.State != ToolRuntimeState.NotInstalled;
 
         _crosshairRoot.Text = $"屏幕准心工具  [{StateToText(cross.State)}]";
         _gammaRoot.Text = $"屏幕调节工具  [{StateToText(gamma.State)}]";
         _nightVisionRoot.Text = $"智能夜视滤镜  [{StateToText(night.State)}]";
+        _mouseRoot.Text = $"🐭 鼠鼠工具  [{StateToText(mouse.State)}]";
     }
 
     private static string StateToText(ToolRuntimeState s) => s switch

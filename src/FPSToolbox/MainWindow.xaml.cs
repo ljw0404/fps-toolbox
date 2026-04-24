@@ -112,7 +112,8 @@ public partial class MainWindow : Window
             if (!_latestUpdate.Toolbox.HasUpdate
                 && !_latestUpdate.Crosshair.HasUpdate
                 && !_latestUpdate.Gamma.HasUpdate
-                && !_latestUpdate.NightVision.HasUpdate)
+                && !_latestUpdate.NightVision.HasUpdate
+            && !_latestUpdate.MouseTool.HasUpdate)
             {
                 MessageBox.Show(this, "当前已是最新版本。",
                     "FPS 工具箱", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -358,6 +359,7 @@ public partial class MainWindow : Window
             ToolIds.CrosshairTool => _latestUpdate.Crosshair,
             ToolIds.GammaTool => _latestUpdate.Gamma,
             ToolIds.NightVisionTool => _latestUpdate.NightVision,
+            ToolIds.MouseTool => _latestUpdate.MouseTool,
             _ => null,
         };
     }
@@ -438,7 +440,7 @@ public partial class MainWindow : Window
                 case ToolRuntimeState.Running:
                     var openSettings = new Button
                     {
-                        Content = name == ToolIds.CrosshairTool ? "打开设置" : "打开面板"
+                        Content = (name == ToolIds.CrosshairTool || name == ToolIds.MouseTool) ? "打开设置" : "打开面板"
                     };
                     openSettings.Click += async (_, _) =>
                     {
@@ -449,6 +451,7 @@ public partial class MainWindow : Window
                             {
                                 ToolIds.GammaTool => IpcActions.GammaOpenPanel,
                                 ToolIds.NightVisionTool => IpcActions.NightVisionOpenPanel,
+                                ToolIds.MouseTool => IpcActions.MouseToolOpenSettings,
                                 _ => IpcActions.CrosshairOpenSettings,
                             };
                             try { await session.SendRequestAsync(action, timeout: TimeSpan.FromSeconds(2)); }

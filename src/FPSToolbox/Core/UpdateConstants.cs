@@ -28,6 +28,7 @@ public static class UpdateConstants
         public const string Crosshair = "crosshair-v";
         public const string Gamma = "gamma-v";
         public const string NightVision = "nightvision-v";
+        public const string Mouse = "mousetool-v";
     }
 
     /// <summary>
@@ -39,6 +40,7 @@ public static class UpdateConstants
         public const string CrosshairTool = "CrosshairTool";
         public const string GammaTool = "GammaTool";
         public const string NightVisionTool = "NightVisionTool";
+        public const string MouseTool = "MouseTool";
     }
 
     /// <summary>
@@ -51,5 +53,6 @@ public static class UpdateConstants
         public const string CrosshairZip = "CrosshairTool-v*.zip";
         public const string GammaZip = "GammaTool-v*.zip";
         public const string NightVisionZip = "NightVisionTool-v*.zip";
+        public const string MouseToolZip = "MouseTool-v*.zip";
     }
 }

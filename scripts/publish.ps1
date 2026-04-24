@@ -33,23 +33,28 @@ function Publish-Project {
 }
 
 # 1. 主程序
-Write-Host "[1/4] FPSToolbox" -ForegroundColor Yellow
+Write-Host "[1/5] FPSToolbox" -ForegroundColor Yellow
 Publish-Project (Join-Path $root "src\FPSToolbox\FPSToolbox.csproj") $payload
 
 # 2. CrosshairTool
-Write-Host "[2/4] CrosshairTool" -ForegroundColor Yellow
+Write-Host "[2/5] CrosshairTool" -ForegroundColor Yellow
 $crosshairOut = Join-Path $payload "tools\CrosshairTool"
 Publish-Project (Join-Path $root "src\CrosshairTool\CrosshairTool.csproj") $crosshairOut
 
 # 3. GammaTool
-Write-Host "[3/4] GammaTool" -ForegroundColor Yellow
+Write-Host "[3/5] GammaTool" -ForegroundColor Yellow
 $gammaOut = Join-Path $payload "tools\GammaTool"
 Publish-Project (Join-Path $root "src\GammaTool\GammaTool.csproj") $gammaOut
 
 # 4. NightVisionTool
-Write-Host "[4/4] NightVisionTool" -ForegroundColor Yellow
+Write-Host "[4/5] NightVisionTool" -ForegroundColor Yellow
 $nightOut = Join-Path $payload "tools\NightVisionTool"
 Publish-Project (Join-Path $root "src\NightVisionTool\NightVisionTool.csproj") $nightOut
+
+# 5. MouseTool
+Write-Host "[5/5] MouseTool" -ForegroundColor Yellow
+$mouseOut = Join-Path $payload "tools\MouseTool"
+Publish-Project (Join-Path $root "src\MouseTool\MouseTool.csproj") $mouseOut
 
 Write-Host ""
 Write-Host "Output layout:" -ForegroundColor Green

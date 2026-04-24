@@ -15,7 +15,7 @@
 
 param(
     [Parameter(Mandatory=$true)]
-    [ValidateSet("CrosshairTool", "GammaTool", "NightVisionTool")]
+    [ValidateSet("CrosshairTool", "GammaTool", "NightVisionTool", "MouseTool")]
     [string]$Tool,
 
     [string]$Version = "1.0.0"

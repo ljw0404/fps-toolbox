@@ -8,8 +8,9 @@ public static class ToolIds
     public const string CrosshairTool = "CrosshairTool";
     public const string GammaTool = "GammaTool";
     public const string NightVisionTool = "NightVisionTool";
+    public const string MouseTool = "MouseTool";
 
-    public static readonly IReadOnlyList<string> All = new[] { CrosshairTool, GammaTool, NightVisionTool };
+    public static readonly IReadOnlyList<string> All = new[] { CrosshairTool, GammaTool, NightVisionTool, MouseTool };
 
     public static bool IsKnown(string name) => All.Contains(name);
 }

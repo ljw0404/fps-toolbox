@@ -57,6 +57,7 @@ public class UpdateChecker
             var crosshairLatest = PickLatest(releases, UpdateConstants.TagPrefix.Crosshair);
             var gammaLatest = PickLatest(releases, UpdateConstants.TagPrefix.Gamma);
             var nightVisionLatest = PickLatest(releases, UpdateConstants.TagPrefix.NightVision);
+            var mouseLatest = PickLatest(releases, UpdateConstants.TagPrefix.Mouse);
 
             result.Toolbox = BuildToolboxInfo(toolboxLatest);
             result.Crosshair = BuildToolInfo(ToolIds.CrosshairTool, "屏幕准心工具",
@@ -65,6 +66,8 @@ public class UpdateChecker
                 gammaLatest, UpdateConstants.TagPrefix.Gamma, UpdateConstants.AssetNamePattern.GammaZip);
             result.NightVision = BuildToolInfo(ToolIds.NightVisionTool, "智能夜视滤镜",
                 nightVisionLatest, UpdateConstants.TagPrefix.NightVision, UpdateConstants.AssetNamePattern.NightVisionZip);
+            result.MouseTool = BuildToolInfo(ToolIds.MouseTool, "鼠鼠工具",
+                mouseLatest, UpdateConstants.TagPrefix.Mouse, UpdateConstants.AssetNamePattern.MouseToolZip);
         }
         catch (TaskCanceledException)
         {

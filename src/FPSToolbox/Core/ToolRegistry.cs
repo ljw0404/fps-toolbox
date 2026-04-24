@@ -23,6 +23,7 @@ public class ToolRegistry
     private const string FallbackCrosshairVersion = "1.0.0";
     private const string FallbackGammaVersion = "1.1.0";
     private const string FallbackNightVisionVersion = "0.1.0";
+    private const string FallbackMouseVersion = "0.1.0";
     private static string ToolZipUrl(string prefix, string toolName, string version) =>
         $"https://github.com/{UpdateConstants.GitHubOwner}/{UpdateConstants.GitHubRepo}/releases/download/{prefix}v{version}/{toolName}-v{version}.zip";
 
@@ -51,6 +52,14 @@ public class ToolRegistry
             Description = "针对黑夜场景的智能屏幕滤镜:暗部提亮 + 亮部保护,走进室内光源不再过曝。只用系统 LUT,不注入游戏。",
             DefaultExeRelativePath = @"tools\NightVisionTool\NightVisionTool.exe",
             DownloadUrl = ToolZipUrl(UpdateConstants.TagPrefix.NightVision, "NightVisionTool", FallbackNightVisionVersion),
+        },
+        new ToolDescriptor
+        {
+            Name = ToolIds.MouseTool,
+            DisplayName = "鼠鼠工具",
+            Description = "可拖动的游戏内悬浮窗，显示鼠标 DPI / 灵敏度换算等信息，支持透明度调节和全局热键显隐。",
+            DefaultExeRelativePath = @"tools\MouseTool\MouseTool.exe",
+            DownloadUrl = ToolZipUrl(UpdateConstants.TagPrefix.Mouse, "MouseTool", FallbackMouseVersion),
         },
     };
 

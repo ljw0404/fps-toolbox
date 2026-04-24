@@ -94,6 +94,10 @@ public static class IpcActions
     public const string NightVisionApplyPreset = "nightVision.applyPreset";
     public const string NightVisionListSchemes = "nightVision.listSchemes";
     public const string NightVisionResetSystem = "nightVision.resetSystem";
+
+    // Toolbox → MouseTool
+    public const string MouseToolOpenSettings = "mouseTool.openSettings";
+    public const string MouseToolToggle = "mouseTool.toggle";
 }
 
 /// <summary>已知的 Event topic 字符串。</summary>
@@ -112,4 +116,7 @@ public static class IpcTopics
     public const string NightVisionState = "nightVision.state";
     public const string NightVisionSchemeApplied = "nightVision.schemeApplied";
     public const string NightVisionSchemesChanged = "nightVision.schemesChanged";
+
+    public const string MouseToolVisibility = "mouseTool.visibility";
+    public const string MouseToolConfigChanged = "mouseTool.configChanged";
 }

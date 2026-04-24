@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <ApplicationIcon>Resources\icon.ico</ApplicationIcon>
+    <AssemblyTitle>MouseTool</AssemblyTitle>
+    <AssemblyDescription>FPS 工具箱 - 鼠鼠工具</AssemblyDescription>
+    <Company>FPSToolbox</Company>
+    <Product>FPSToolbox.MouseTool</Product>
+    <Version>0.1.0</Version>
+    <RootNamespace>MouseTool</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Resource Include="Resources\icon.ico" Condition="Exists('Resources\icon.ico')" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\shared\FPSToolbox.Shared\FPSToolbox.Shared.csproj" />
+  </ItemGroup>
+
+</Project>

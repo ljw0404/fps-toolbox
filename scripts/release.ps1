@@ -32,7 +32,7 @@
 
 param(
     [Parameter(Mandatory = $true)]
-    [ValidateSet('toolbox', 'crosshair', 'gamma', 'nightvision', 'all')]
+    [ValidateSet('toolbox', 'crosshair', 'gamma', 'nightvision', 'mousetool', 'all')]
     [string]$Target,
 
     [Parameter(Mandatory = $true)]
@@ -206,15 +206,22 @@ switch ($Target) {
         Publish-GhRelease -Tag "nightvision-v$Version" -Title "智能夜视滤镜 v$Version" `
             -Files @($zip) -NotesBody $Notes
     }
+    'mousetool' {
+        $zip = Pack-Tool -ToolName 'MouseTool' -V $Version
+        Publish-GhRelease -Tag "mousetool-v$Version" -Title "鼠鼠工具 v$Version" `
+            -Files @($zip) -NotesBody $Notes
+    }
     'all' {
         $tbFiles = Build-ToolboxInstallers -V $Version
         $chZip   = Pack-Tool -ToolName 'CrosshairTool' -V $Version
         $gmZip   = Pack-Tool -ToolName 'GammaTool' -V $Version
         $nvZip   = Pack-Tool -ToolName 'NightVisionTool' -V $Version
+        $mtZip   = Pack-Tool -ToolName 'MouseTool' -V $Version
         Publish-GhRelease -Tag "toolbox-v$Version"     -Title "FPS 工具箱 v$Version"       -Files $tbFiles -NotesBody $Notes
         Publish-GhRelease -Tag "crosshair-v$Version"   -Title "屏幕准心工具 v$Version"     -Files @($chZip) -NotesBody $Notes
         Publish-GhRelease -Tag "gamma-v$Version"       -Title "屏幕调节工具 v$Version"     -Files @($gmZip) -NotesBody $Notes
         Publish-GhRelease -Tag "nightvision-v$Version" -Title "智能夜视滤镜 v$Version"     -Files @($nvZip) -NotesBody $Notes
+        Publish-GhRelease -Tag "mousetool-v$Version"   -Title "鼠鼠工具 v$Version"         -Files @($mtZip) -NotesBody $Notes
     }
 }
 
