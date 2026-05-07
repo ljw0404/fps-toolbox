@@ -12,8 +12,10 @@
     <AssemblyDescription>FPS 工具箱 - 智能夜视滤镜工具</AssemblyDescription>
     <Company>FPSToolbox</Company>
     <Product>FPSToolbox.NightVisionTool</Product>
-    <Version>0.1.0</Version>
+    <Version>0.1.1</Version>
     <RootNamespace>NightVisionTool</RootNamespace>
+    <!-- 强制管理员：与游戏完整性级别对齐，确保全局热键穿透 UIPI 屏蔽。 -->
+    <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
 
   <ItemGroup>

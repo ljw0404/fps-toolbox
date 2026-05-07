@@ -17,8 +17,8 @@ public class MouseToolConfig
     /// <summary>是否置顶，默认 true。</summary>
     public bool AlwaysOnTop { get; set; } = true;
 
-    /// <summary>面板背景色（ARGB hex，含透明通道）。</summary>
-    public string BackgroundHex { get; set; } = "#CC101827";
+    /// <summary>面板背景色（RGB hex，alpha 固定 FF；整体透明度由 WindowOpacity 控制）。</summary>
+    public string BackgroundHex { get; set; } = "#FF101827";
 
     /// <summary>文字颜色（RGB hex）。</summary>
     public string ForegroundHex { get; set; } = "#E8EAF0";
@@ -31,4 +31,8 @@ public class MouseToolConfig
 
     /// <summary>显示 / 隐藏悬浮窗的全局热键，默认 F10（不与 Crosshair F8 / NightVision F9 冲突）。</summary>
     public string ToggleHotkey { get; set; } = "F10";
+
+    /// <summary>KKRB 数据库连接字符串（默认指向自建 PostgreSQL）。</summary>
+    public string DbConnectionString { get; set; } =
+        "Host=103.65.39.210;Port=55432;Database=sanjiaozhou;Username=postgres;Password=yrx7ItgPEIwdyM5MPlo0vBe0JXjYTVL0;SSL Mode=Disable";
 }

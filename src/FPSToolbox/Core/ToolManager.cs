@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Diagnostics;
 using FPSToolbox.Models;
 using FPSToolbox.Shared.Ipc;
@@ -65,31 +66,46 @@ public class ToolManager
         info.State = ToolRuntimeState.Starting;
         StateChanged?.Invoke(name);
 
-        var psi = new ProcessStartInfo
-        {
-            FileName = tool.ExePath,
-            Arguments = $"--parent-pid {Environment.ProcessId} --pipe {_pipeName}",
-            UseShellExecute = false,
-            WorkingDirectory = System.IO.Path.GetDirectoryName(tool.ExePath)!,
-        };
+        var args = $"--parent-pid {Environment.ProcessId} --pipe {_pipeName}";
+        var workDir = System.IO.Path.GetDirectoryName(tool.ExePath)!;
 
+        // 优先用 UseShellExecute=false（无 UAC，子进程继承父进程完整性级别 —— 主框架已提权时最佳路径）。
+        // 若子进程 manifest 声明 requireAdministrator 而父进程是普通权限，
+        // CreateProcess 会返回 ERROR_ELEVATION_REQUIRED (740)，此时 fallback 到 ShellExecute + runas
+        // 让 Windows 弹 UAC 启动 —— 牺牲一次 UAC 弹窗换取功能可用。
+
+        Process? proc = null;
         try
         {
-            var proc = Process.Start(psi);
-            if (proc == null) { info.State = ToolRuntimeState.Installed; return false; }
-            info.Pid = proc.Id;
-            proc.EnableRaisingEvents = true;
-            proc.Exited += (_, _) =>
+            proc = Process.Start(new ProcessStartInfo
             {
-                lock (_lock)
+                FileName = tool.ExePath,
+                Arguments = args,
+                UseShellExecute = false,
+                WorkingDirectory = workDir,
+            });
+        }
+        catch (Win32Exception ex) when (ex.NativeErrorCode == 740 /* ERROR_ELEVATION_REQUIRED */)
+        {
+            // 子进程要求管理员，但主框架是普通权限 —— 用 ShellExecute 触发 UAC。
+            try
+            {
+                proc = Process.Start(new ProcessStartInfo
                 {
-                    info.State = ToolRuntimeState.Installed;
-                    info.Pid = null;
-                    info.Session = null;
-                }
+                    FileName = tool.ExePath,
+                    Arguments = args,
+                    UseShellExecute = true,
+                    Verb = "runas",
+                    WorkingDirectory = workDir,
+                });
+            }
+            catch
+            {
+                // 用户在 UAC 对话框点了"否"，或 ShellExecute 失败。
+                info.State = ToolRuntimeState.Installed;
                 StateChanged?.Invoke(name);
-            };
-            return true;
+                return false;
+            }
         }
         catch
         {
@@ -97,6 +113,27 @@ public class ToolManager
             StateChanged?.Invoke(name);
             return false;
         }
+
+        if (proc == null)
+        {
+            info.State = ToolRuntimeState.Installed;
+            StateChanged?.Invoke(name);
+            return false;
+        }
+
+        info.Pid = proc.Id;
+        proc.EnableRaisingEvents = true;
+        proc.Exited += (_, _) =>
+        {
+            lock (_lock)
+            {
+                info.State = ToolRuntimeState.Installed;
+                info.Pid = null;
+                info.Session = null;
+            }
+            StateChanged?.Invoke(name);
+        };
+        return true;
     }
 
     public async Task StopAsync(string name)

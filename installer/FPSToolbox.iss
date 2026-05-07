@@ -67,7 +67,7 @@ Name: "chinesesimplified"; MessagesFile: "Languages\ChineseSimplified.isl"
 Name: "english";           MessagesFile: "compiler:Default.isl"
 
 [Types]
-Name: "full";    Description: "完整安装（主程序 + 三个工具）"
+Name: "full";    Description: "完整安装（主程序 + 四个工具）"
 Name: "compact"; Description: "最小安装（仅主程序）"
 Name: "custom";  Description: "自定义安装";                       Flags: iscustom
 
@@ -76,6 +76,7 @@ Name: "main";        Description: "FPS 工具箱主程序（必需）"; Types: f
 Name: "crosshair";   Description: "屏幕准心工具";            Types: full
 Name: "gamma";       Description: "屏幕调节工具";            Types: full
 Name: "nightvision"; Description: "智能夜视滤镜";            Types: full
+Name: "mousetool";   Description: "鼠鼠工具（行情 + 装备维修）"; Types: full
 
 [Tasks]
 Name: "desktopicon";  Description: "创建桌面快捷方式"; GroupDescription: "附加图标:"; Flags: unchecked
@@ -102,6 +103,10 @@ Source: "{#SourceDir}\tools\GammaTool\*"; DestDir: "{app}\tools\GammaTool"; \
 ; 智能夜视滤镜(同上)
 Source: "{#SourceDir}\tools\NightVisionTool\*"; DestDir: "{app}\tools\NightVisionTool"; \
     Flags: ignoreversion recursesubdirs createallsubdirs uninsneveruninstall; Components: nightvision
+
+; 鼠鼠工具(同上)
+Source: "{#SourceDir}\tools\MouseTool\*"; DestDir: "{app}\tools\MouseTool"; \
+    Flags: ignoreversion recursesubdirs createallsubdirs uninsneveruninstall; Components: mousetool
 
 #ifdef OFFLINE
 ; 离线版:内嵌 .NET Desktop Runtime 安装器
@@ -133,10 +138,11 @@ Filename: "{app}\{#AppExeName}"; Flags: nowait runasoriginaluser; Check: WizardS
 
 [UninstallRun]
 ; 卸载前先关掉所有相关进程
-Filename: "taskkill.exe"; Parameters: "/f /im FPSToolbox.exe";   Flags: runhidden; RunOnceId: "KillMain"
-Filename: "taskkill.exe"; Parameters: "/f /im CrosshairTool.exe"; Flags: runhidden; RunOnceId: "KillCross"
-Filename: "taskkill.exe"; Parameters: "/f /im GammaTool.exe";     Flags: runhidden; RunOnceId: "KillGamma"
+Filename: "taskkill.exe"; Parameters: "/f /im FPSToolbox.exe";     Flags: runhidden; RunOnceId: "KillMain"
+Filename: "taskkill.exe"; Parameters: "/f /im CrosshairTool.exe";  Flags: runhidden; RunOnceId: "KillCross"
+Filename: "taskkill.exe"; Parameters: "/f /im GammaTool.exe";      Flags: runhidden; RunOnceId: "KillGamma"
 Filename: "taskkill.exe"; Parameters: "/f /im NightVisionTool.exe"; Flags: runhidden; RunOnceId: "KillNight"
+Filename: "taskkill.exe"; Parameters: "/f /im MouseTool.exe";      Flags: runhidden; RunOnceId: "KillMouse"
 
 [Code]
 #ifndef OFFLINE
@@ -242,6 +248,7 @@ begin
     Exec('taskkill.exe', '/f /im CrosshairTool.exe',   '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
     Exec('taskkill.exe', '/f /im GammaTool.exe',       '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
     Exec('taskkill.exe', '/f /im NightVisionTool.exe', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+    Exec('taskkill.exe', '/f /im MouseTool.exe',       '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
 
     if NeedsDotNet() then
     begin
@@ -267,6 +274,7 @@ begin
     Exec('taskkill.exe', '/f /im CrosshairTool.exe',   '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
     Exec('taskkill.exe', '/f /im GammaTool.exe',       '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
     Exec('taskkill.exe', '/f /im NightVisionTool.exe', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+    Exec('taskkill.exe', '/f /im MouseTool.exe',       '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
   end;
 end;
 #endif
@@ -279,13 +287,14 @@ procedure AutoCheckExistingTools;
 var
   I: Integer;
   AppDir, Desc: String;
-  HasCrosshair, HasGamma, HasNight: Boolean;
+  HasCrosshair, HasGamma, HasNight, HasMouse: Boolean;
 begin
   AppDir := WizardForm.DirEdit.Text;
   HasCrosshair := FileExists(AppDir + '\tools\CrosshairTool\CrosshairTool.exe');
   HasGamma     := FileExists(AppDir + '\tools\GammaTool\GammaTool.exe');
   HasNight     := FileExists(AppDir + '\tools\NightVisionTool\NightVisionTool.exe');
-  if (not HasCrosshair) and (not HasGamma) and (not HasNight) then Exit;
+  HasMouse     := FileExists(AppDir + '\tools\MouseTool\MouseTool.exe');
+  if (not HasCrosshair) and (not HasGamma) and (not HasNight) and (not HasMouse) then Exit;
 
   for I := 0 to WizardForm.ComponentsList.Items.Count - 1 do
   begin
@@ -295,6 +304,8 @@ begin
     if HasGamma and (Pos('调节', Desc) > 0) then
       WizardForm.ComponentsList.Checked[I] := True;
     if HasNight and (Pos('夜视', Desc) > 0) then
+      WizardForm.ComponentsList.Checked[I] := True;
+    if HasMouse and (Pos('鼠鼠', Desc) > 0) then
       WizardForm.ComponentsList.Checked[I] := True;
   end;
 end;
@@ -306,57 +317,165 @@ begin
 end;
 
 // ──────────────────────────────────────────────────────────────
-// 卸载前:询问用户勾选哪些子工具一起卸载 + 是否清用户数据
+// 卸载前:弹出一个统一界面,让用户勾选要删除的子工具 + 是否清数据
 // ──────────────────────────────────────────────────────────────
 var
   UninstCrosshair: Boolean;
-  UninstGamma: Boolean;
-  UninstNight: Boolean;
+  UninstGamma:     Boolean;
+  UninstNight:     Boolean;
+  UninstMouse:     Boolean;
+  UninstData:      Boolean;
 
 function InitializeUninstall(): Boolean;
 var
-  ToolsRoot: String;
-  HasCrosshair, HasGamma, HasNight: Boolean;
+  Form: TForm;
+  LblTitle: TLabel;
+  BtnOK, BtnSkip: TButton;
+  ChkCrosshair, ChkGamma, ChkNight, ChkMouse, ChkData: TCheckBox;
+  ToolsRoot, DataPath: String;
+  HasCrosshair, HasGamma, HasNight, HasMouse, HasData: Boolean;
+  Y: Integer;
 begin
   Result := True;
   UninstCrosshair := False;
-  UninstGamma := False;
-  UninstNight := False;
+  UninstGamma     := False;
+  UninstNight     := False;
+  UninstMouse     := False;
+  UninstData      := False;
 
   ToolsRoot := ExpandConstant('{app}\tools');
+  DataPath  := ExpandConstant('{userappdata}\FPSToolbox');
   HasCrosshair := DirExists(ToolsRoot + '\CrosshairTool');
   HasGamma     := DirExists(ToolsRoot + '\GammaTool');
   HasNight     := DirExists(ToolsRoot + '\NightVisionTool');
+  HasMouse     := DirExists(ToolsRoot + '\MouseTool');
+  HasData      := DirExists(DataPath);
 
-  if HasCrosshair then
-    UninstCrosshair := (MsgBox(
-      '是否同时卸载「屏幕准心工具」？' + #13#10 + #13#10 +
-      '安装位置：' + ToolsRoot + '\CrosshairTool' + #13#10 + #13#10 +
-      '选择"是"：删除该工具的所有文件。' + #13#10 +
-      '选择"否"：保留该工具的文件（下次安装 FPS 工具箱后可直接使用）。',
-      mbConfirmation, MB_YESNO or MB_DEFBUTTON2) = IDYES);
+  // 没有子工具也没有数据,直接跳过弹窗
+  if (not HasCrosshair) and (not HasGamma) and (not HasNight)
+     and (not HasMouse) and (not HasData) then
+    Exit;
 
-  if HasGamma then
-    UninstGamma := (MsgBox(
-      '是否同时卸载「屏幕调节工具」？' + #13#10 + #13#10 +
-      '安装位置：' + ToolsRoot + '\GammaTool' + #13#10 + #13#10 +
-      '选择"是"：删除该工具的所有文件。' + #13#10 +
-      '选择"否"：保留该工具的文件（下次安装 FPS 工具箱后可直接使用）。',
-      mbConfirmation, MB_YESNO or MB_DEFBUTTON2) = IDYES);
+  ChkCrosshair := nil;
+  ChkGamma     := nil;
+  ChkNight     := nil;
+  ChkMouse     := nil;
+  ChkData      := nil;
 
-  if HasNight then
-    UninstNight := (MsgBox(
-      '是否同时卸载「智能夜视滤镜」？' + #13#10 + #13#10 +
-      '安装位置：' + ToolsRoot + '\NightVisionTool' + #13#10 + #13#10 +
-      '选择"是"：删除该工具的所有文件。' + #13#10 +
-      '选择"否"：保留该工具的文件（下次安装 FPS 工具箱后可直接使用）。',
-      mbConfirmation, MB_YESNO or MB_DEFBUTTON2) = IDYES);
+  Form := TForm.Create(nil);
+  try
+    Form.Caption     := 'FPS 工具箱 — 卸载选项';
+    Form.ClientWidth := ScaleX(480);
+    Form.Position    := poScreenCenter;
+
+    Y := ScaleY(16);
+
+    LblTitle          := TLabel.Create(Form);
+    LblTitle.Parent   := Form;
+    LblTitle.AutoSize := False;
+    LblTitle.WordWrap := True;
+    LblTitle.Left     := ScaleX(16);
+    LblTitle.Top      := Y;
+    LblTitle.Width    := ScaleX(448);
+    LblTitle.Height   := ScaleY(36);
+    LblTitle.Caption  := '主程序将被卸载。以下子工具和用户数据默认保留，勾选后将一并删除：';
+    Y := Y + ScaleY(44);
+
+    if HasCrosshair then
+    begin
+      ChkCrosshair         := TCheckBox.Create(Form);
+      ChkCrosshair.Parent  := Form;
+      ChkCrosshair.Left    := ScaleX(16);
+      ChkCrosshair.Top     := Y;
+      ChkCrosshair.Width   := ScaleX(448);
+      ChkCrosshair.Caption := '屏幕准心工具（' + ToolsRoot + '\CrosshairTool）';
+      Y := Y + ScaleY(22);
+    end;
+
+    if HasGamma then
+    begin
+      ChkGamma         := TCheckBox.Create(Form);
+      ChkGamma.Parent  := Form;
+      ChkGamma.Left    := ScaleX(16);
+      ChkGamma.Top     := Y;
+      ChkGamma.Width   := ScaleX(448);
+      ChkGamma.Caption := '屏幕调节工具（' + ToolsRoot + '\GammaTool）';
+      Y := Y + ScaleY(22);
+    end;
+
+    if HasNight then
+    begin
+      ChkNight         := TCheckBox.Create(Form);
+      ChkNight.Parent  := Form;
+      ChkNight.Left    := ScaleX(16);
+      ChkNight.Top     := Y;
+      ChkNight.Width   := ScaleX(448);
+      ChkNight.Caption := '智能夜视滤镜（' + ToolsRoot + '\NightVisionTool）';
+      Y := Y + ScaleY(22);
+    end;
+
+    if HasMouse then
+    begin
+      ChkMouse         := TCheckBox.Create(Form);
+      ChkMouse.Parent  := Form;
+      ChkMouse.Left    := ScaleX(16);
+      ChkMouse.Top     := Y;
+      ChkMouse.Width   := ScaleX(448);
+      ChkMouse.Caption := '鼠鼠工具（' + ToolsRoot + '\MouseTool）';
+      Y := Y + ScaleY(22);
+    end;
+
+    if HasData then
+    begin
+      Y := Y + ScaleY(6);
+      ChkData         := TCheckBox.Create(Form);
+      ChkData.Parent  := Form;
+      ChkData.Left    := ScaleX(16);
+      ChkData.Top     := Y;
+      ChkData.Width   := ScaleX(448);
+      ChkData.Caption := '清除用户配置数据（' + DataPath + '）';
+      Y := Y + ScaleY(22);
+    end;
+
+    Y := Y + ScaleY(16);
+
+    BtnSkip            := TButton.Create(Form);
+    BtnSkip.Parent     := Form;
+    BtnSkip.Caption    := '全部保留';
+    BtnSkip.ModalResult := mrCancel;
+    BtnSkip.Width      := ScaleX(88);
+    BtnSkip.Height     := ScaleY(28);
+    BtnSkip.Left       := Form.ClientWidth - ScaleX(104);
+    BtnSkip.Top        := Y;
+
+    BtnOK              := TButton.Create(Form);
+    BtnOK.Parent       := Form;
+    BtnOK.Caption      := '确定';
+    BtnOK.ModalResult  := mrOK;
+    BtnOK.Width        := ScaleX(88);
+    BtnOK.Height       := ScaleY(28);
+    BtnOK.Left         := BtnSkip.Left - ScaleX(100);
+    BtnOK.Top          := Y;
+    BtnOK.Default      := True;
+
+    Form.ClientHeight  := Y + ScaleY(44);
+
+    if Form.ShowModal() = mrOK then
+    begin
+      if ChkCrosshair <> nil then UninstCrosshair := ChkCrosshair.Checked;
+      if ChkGamma     <> nil then UninstGamma     := ChkGamma.Checked;
+      if ChkNight     <> nil then UninstNight     := ChkNight.Checked;
+      if ChkMouse     <> nil then UninstMouse     := ChkMouse.Checked;
+      if ChkData      <> nil then UninstData      := ChkData.Checked;
+    end;
+  finally
+    Form.Free();
+  end;
 end;
 
 procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
 var
   AppPath, DataPath: String;
-  ClearData: Boolean;
 begin
   if CurUninstallStep = usUninstall then
   begin
@@ -364,23 +483,14 @@ begin
     if UninstCrosshair then DelTree(AppPath + '\tools\CrosshairTool',   True, True, True);
     if UninstGamma     then DelTree(AppPath + '\tools\GammaTool',       True, True, True);
     if UninstNight     then DelTree(AppPath + '\tools\NightVisionTool', True, True, True);
-    // 若三个子工具都删了,顺手把空的 tools\ 目录也清掉
-    if UninstCrosshair and UninstGamma and UninstNight then
-      RemoveDir(AppPath + '\tools');
+    if UninstMouse     then DelTree(AppPath + '\tools\MouseTool',       True, True, True);
+    // 所有子工具都删掉后 tools\ 为空,顺手移除(非空时 RemoveDir 静默失败)
+    RemoveDir(AppPath + '\tools');
   end;
   if CurUninstallStep = usPostUninstall then
   begin
     DataPath := ExpandConstant('{userappdata}\FPSToolbox');
-    if DirExists(DataPath) then
-    begin
-      ClearData := (MsgBox('是否同时清除 FPS 工具箱的用户数据？' + #13#10 + #13#10 +
-                           '用户数据包括：所有工具的配置、保存的方案 / 预设。' + #13#10 +
-                           '路径：' + DataPath + #13#10 + #13#10 +
-                           '选择"是"：彻底清除，再次安装时需要重新配置。' + #13#10 +
-                           '选择"否"：保留数据，再次安装后可继续使用原来的方案。',
-                           mbConfirmation, MB_YESNO or MB_DEFBUTTON2) = IDYES);
-      if ClearData then
-        DelTree(DataPath, True, True, True);
-    end;
+    if UninstData and DirExists(DataPath) then
+      DelTree(DataPath, True, True, True);
   end;
 end;

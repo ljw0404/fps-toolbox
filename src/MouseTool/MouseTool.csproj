@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
@@ -8,15 +8,22 @@
     <UseWPF>true</UseWPF>
     <ApplicationIcon>Resources\icon.ico</ApplicationIcon>
     <AssemblyTitle>MouseTool</AssemblyTitle>
-    <AssemblyDescription>FPS 工具箱 - 鼠鼠工具</AssemblyDescription>
+    <AssemblyDescription>FPS 宸ュ叿绠?- 榧犻紶宸ュ叿</AssemblyDescription>
     <Company>FPSToolbox</Company>
     <Product>FPSToolbox.MouseTool</Product>
-    <Version>0.1.0</Version>
+    <Version>1.0.16</Version>
     <RootNamespace>MouseTool</RootNamespace>
+    <!-- 强制以管理员身份运行：与游戏（如 Delta Force）的完整性级别对齐，
+         否则 Windows UIPI 会屏蔽对游戏窗口的全局热键拦截。 -->
+    <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
 
   <ItemGroup>
     <Resource Include="Resources\icon.ico" Condition="Exists('Resources\icon.ico')" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Npgsql" Version="8.*" />
   </ItemGroup>
 
   <ItemGroup>

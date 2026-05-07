@@ -152,13 +152,13 @@
                 <TextBlock Text="背景色预设" Style="{StaticResource Label}" Margin="0,4,0,6"/>
                 <WrapPanel Margin="0,0,0,10">
                     <Button x:Name="BtnBgDark"   Content="深夜蓝"  Width="72" Margin="0,0,6,6"
-                            Tag="#CC101827" Click="OnBgPresetClicked"/>
+                            Tag="#FF101827" Click="OnBgPresetClicked"/>
                     <Button x:Name="BtnBgBlack"  Content="纯黑"    Width="72" Margin="0,0,6,6"
-                            Tag="#DD000000" Click="OnBgPresetClicked"/>
+                            Tag="#FF000000" Click="OnBgPresetClicked"/>
                     <Button x:Name="BtnBgGreen"  Content="暗绿"    Width="72" Margin="0,0,6,6"
-                            Tag="#CC0A1F0F" Click="OnBgPresetClicked"/>
+                            Tag="#FF0A1F0F" Click="OnBgPresetClicked"/>
                     <Button x:Name="BtnBgWarm"   Content="暗红"    Width="72" Margin="0,0,6,6"
-                            Tag="#CC1F0A0A" Click="OnBgPresetClicked"/>
+                            Tag="#FF1F0A0A" Click="OnBgPresetClicked"/>
                 </WrapPanel>
 
                 <!-- 描边 / 置顶 -->

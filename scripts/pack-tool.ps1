@@ -28,6 +28,14 @@ $csproj = Join-Path $root "src\$Tool\$Tool.csproj"
 $outDir = Join-Path $root "dist\packages\$Tool"
 $zipPath = Join-Path $root "dist\packages\$Tool-v$Version.zip"
 
+# 同步 csproj 版本号
+$content = Get-Content $csproj -Raw
+$updated = $content -replace '<Version>[^<]+</Version>', "<Version>$Version</Version>"
+if ($content -ne $updated) {
+    Set-Content -Path $csproj -Value $updated -Encoding UTF8 -NoNewline
+    Write-Host "  $Tool.csproj <Version> -> $Version" -ForegroundColor Gray
+}
+
 if (Test-Path $outDir) { Remove-Item $outDir -Recurse -Force }
 New-Item -ItemType Directory -Path $outDir | Out-Null
 

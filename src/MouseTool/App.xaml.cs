@@ -1,4 +1,5 @@
 using System.IO;
+using System.Security.Principal;
 using System.Threading;
 using System.Windows;
 using FPSToolbox.Shared;
@@ -11,6 +12,27 @@ namespace MouseTool;
 public partial class App : System.Windows.Application
 {
     private static readonly string LogPath = PathService.GetLogFile(ToolIds.MouseTool);
+
+    /// <summary>
+    /// 当前进程是否已以管理员（High Integrity）身份运行。
+    /// 反作弊游戏（如 Delta Force / ACE-Guard）会把游戏拉到 High Integrity，
+    /// Windows UIPI 机制会屏蔽 Medium 级别进程对游戏窗口的全局热键拦截。
+    /// 本工具的 app.manifest 已声明 requireAdministrator，正常情况下此处必为 true；
+    /// 若仍为 false（manifest 被外部去除/特殊启动方式），需提示用户。
+    /// </summary>
+    public static bool IsRunningAsAdmin
+    {
+        get
+        {
+            try
+            {
+                using var identity = WindowsIdentity.GetCurrent();
+                var principal = new WindowsPrincipal(identity);
+                return principal.IsInRole(WindowsBuiltInRole.Administrator);
+            }
+            catch { return false; }
+        }
+    }
 
     private Mutex? _mutex;
     private IpcClient? _ipc;
@@ -47,6 +69,15 @@ public partial class App : System.Windows.Application
             }
 
             base.OnStartup(e);
+
+            // 启动诊断：未提权时记录到日志，便于排查"游戏中热键无效"的问题。
+            if (!IsRunningAsAdmin)
+            {
+                WriteLog(new InvalidOperationException(
+                    "MouseTool 当前未以管理员身份运行；游戏内的全局热键可能因 Windows UIPI 机制被屏蔽。" +
+                    "请通过 FPS 工具箱主程序启动（主框架 manifest 已声明 requireAdministrator），" +
+                    "或对 MouseTool.exe 单独右键 → 以管理员身份运行。"));
+            }
 
             _config = new ConfigManager();
 

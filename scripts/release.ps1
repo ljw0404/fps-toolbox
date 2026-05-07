@@ -80,7 +80,21 @@ $dotnetUrl = "https://builds.dotnet.microsoft.com/dotnet/WindowsDesktop/$dotnetV
 # ─────────────────────────────────────────────────────────────
 # 通用步骤
 # ─────────────────────────────────────────────────────────────
+function Sync-CsprojVersion {
+    param([string]$CsprojPath, [string]$V, [string]$Label)
+    $content = Get-Content $CsprojPath -Raw
+    $updated = $content -replace '<Version>[^<]+</Version>', "<Version>$V</Version>"
+    if ($content -ne $updated) {
+        Set-Content -Path $CsprojPath -Value $updated -Encoding UTF8 -NoNewline
+        Info "$Label <Version> 已更新为 $V"
+    }
+}
+
 function Publish-All {
+    # 只有发主框架时才更新主框架 csproj 版本
+    if ($Target -in @('toolbox', 'all')) {
+        Sync-CsprojVersion -CsprojPath (Join-Path $root 'src\FPSToolbox\FPSToolbox.csproj') -V $Version -Label 'FPSToolbox.csproj'
+    }
     Info "dotnet publish 三个项目(Release)..."
     & (Join-Path $root 'scripts\publish.ps1')
     if ($LASTEXITCODE -ne 0) { Fail "publish.ps1 失败" }

@@ -1,4 +1,6 @@
+using System.Diagnostics;
 using System.IO;
+using System.Text.Json;
 using FPSToolbox.Models;
 using FPSToolbox.Shared;
 using FPSToolbox.Shared.Config;
@@ -98,23 +100,64 @@ public class ToolRegistry
 
     /// <summary>
     /// 自检：扫描 tools\ 目录，发现 exe 即视为已安装（兼容安装器直接落盘未更新 manifest 的情况）。
+    /// 版本号优先读同级 manifest.json，其次读 exe 的 FileVersionInfo，兜底 "1.0.0"。
     /// </summary>
     public void AutoDiscover(string baseDir)
     {
         foreach (var desc in AllDescriptors)
         {
             var path = Path.Combine(baseDir, desc.DefaultExeRelativePath);
-            if (File.Exists(path) && Get(desc.Name) == null)
+            if (!File.Exists(path) || Get(desc.Name) != null)
+                continue;
+
+            var version = ReadToolVersion(path);
+            _manifest.Tools.Add(new InstalledTool
             {
-                _manifest.Tools.Add(new InstalledTool
-                {
-                    Name = desc.Name,
-                    Version = "1.0.0",
-                    ExePath = path,
-                    InstalledAt = DateTime.Now
-                });
-            }
+                Name        = desc.Name,
+                Version     = version,
+                ExePath     = path,
+                InstalledAt = DateTime.Now
+            });
         }
         Save();
+    }
+
+    /// <summary>
+    /// 读取子工具版本：manifest.json → FileVersionInfo → "1.0.0"
+    /// </summary>
+    private static string ReadToolVersion(string exePath)
+    {
+        // 1. manifest.json（由 publish.ps1 / pack-tool.ps1 生成）
+        var manifestPath = Path.Combine(Path.GetDirectoryName(exePath)!, "manifest.json");
+        if (File.Exists(manifestPath))
+        {
+            try
+            {
+                using var doc = JsonDocument.Parse(File.ReadAllText(manifestPath));
+                if (doc.RootElement.TryGetProperty("version", out var v))
+                {
+                    var ver = v.GetString();
+                    if (!string.IsNullOrWhiteSpace(ver))
+                        return ver;
+                }
+            }
+            catch { /* 解析失败继续 */ }
+        }
+
+        // 2. FileVersionInfo（ProductVersion 可能带 +commitHash，取 + 前的部分）
+        try
+        {
+            var fvi = FileVersionInfo.GetVersionInfo(exePath);
+            var pv  = fvi.ProductVersion?.Split('+')[0].Trim();
+            if (!string.IsNullOrWhiteSpace(pv))
+                return pv;
+            var fv = fvi.FileVersion?.TrimEnd('0', '.').Trim();
+            if (!string.IsNullOrWhiteSpace(fv))
+                return fv;
+        }
+        catch { /* 文件锁定等情况 */ }
+
+        // 3. 兜底
+        return "1.0.0";
     }
 }

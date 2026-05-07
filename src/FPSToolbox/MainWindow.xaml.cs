@@ -575,6 +575,15 @@ public partial class MainWindow : Window
                 url, AppDomain.CurrentDomain.BaseDirectory, progress);
 
             _registry.Upsert(installed);
+
+            // 安装成功 → 清除缓存里的"有更新"标记，避免卡片刷新后仍显示"更新到 vX"
+            var updInfo = GetUpdateInfoFor(name);
+            if (updInfo != null)
+            {
+                updInfo.HasUpdate = false;
+                updInfo.CurrentVersion = installed.Version;
+            }
+
             MessageBox.Show(this,
                 $"{installed.Name} v{installed.Version} 安装完成",
                 "FPS 工具箱", MessageBoxButton.OK, MessageBoxImage.Information);

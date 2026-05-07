@@ -12,8 +12,10 @@
     <AssemblyDescription>FPS 工具箱 - 屏幕调节工具</AssemblyDescription>
     <Company>FPSToolbox</Company>
     <Product>FPSToolbox.GammaTool</Product>
-    <Version>1.1.0</Version>
+    <Version>1.1.1</Version>
     <RootNamespace>GammaTool</RootNamespace>
+    <!-- 强制管理员：与游戏完整性级别对齐，确保全局热键穿透 UIPI 屏蔽。 -->
+    <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
 
   <ItemGroup>

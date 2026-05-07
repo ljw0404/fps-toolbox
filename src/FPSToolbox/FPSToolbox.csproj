@@ -12,8 +12,11 @@
     <AssemblyDescription>FPS 工具箱</AssemblyDescription>
     <Company>FPSToolbox</Company>
     <Product>FPSToolbox</Product>
-    <Version>1.0.8</Version>
+    <Version>1.0.15</Version>
     <RootNamespace>FPSToolbox</RootNamespace>
+    <!-- 主框架强制管理员提权：用户启动时一次 UAC，子工具进程继承 High Integrity，
+         避免每次启动子工具都弹 UAC，并让全局热键能穿透反作弊游戏。 -->
+    <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
 
   <ItemGroup>

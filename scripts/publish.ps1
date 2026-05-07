@@ -32,6 +32,24 @@ function Publish-Project {
     }
 }
 
+# 为每个子工具生成 manifest.json，安装器打包时会一并复制进去
+# 这样 AutoDiscover 就能读到正确版本，不会被误判为"有新版本"
+function Write-ToolManifest {
+    param([string]$ToolName, [string]$OutDir, [string]$CsprojPath)
+    $xml     = [xml](Get-Content $CsprojPath -Raw)
+    $version = $xml.Project.PropertyGroup.Version
+    $exePath = Join-Path $OutDir "$ToolName.exe"
+    $sha     = if (Test-Path $exePath) { (Get-FileHash $exePath -Algorithm SHA256).Hash } else { "" }
+    $manifest = [ordered]@{
+        name    = $ToolName
+        version = $version
+        exeName = "$ToolName.exe"
+        sha256  = $sha
+    } | ConvertTo-Json
+    Set-Content (Join-Path $OutDir "manifest.json") -Value $manifest -Encoding UTF8
+    Write-Host "  manifest.json  v$version" -ForegroundColor Gray
+}
+
 # 1. 主程序
 Write-Host "[1/5] FPSToolbox" -ForegroundColor Yellow
 Publish-Project (Join-Path $root "src\FPSToolbox\FPSToolbox.csproj") $payload
@@ -40,21 +58,25 @@ Publish-Project (Join-Path $root "src\FPSToolbox\FPSToolbox.csproj") $payload
 Write-Host "[2/5] CrosshairTool" -ForegroundColor Yellow
 $crosshairOut = Join-Path $payload "tools\CrosshairTool"
 Publish-Project (Join-Path $root "src\CrosshairTool\CrosshairTool.csproj") $crosshairOut
+Write-ToolManifest "CrosshairTool" $crosshairOut (Join-Path $root "src\CrosshairTool\CrosshairTool.csproj")
 
 # 3. GammaTool
 Write-Host "[3/5] GammaTool" -ForegroundColor Yellow
 $gammaOut = Join-Path $payload "tools\GammaTool"
 Publish-Project (Join-Path $root "src\GammaTool\GammaTool.csproj") $gammaOut
+Write-ToolManifest "GammaTool" $gammaOut (Join-Path $root "src\GammaTool\GammaTool.csproj")
 
 # 4. NightVisionTool
 Write-Host "[4/5] NightVisionTool" -ForegroundColor Yellow
 $nightOut = Join-Path $payload "tools\NightVisionTool"
 Publish-Project (Join-Path $root "src\NightVisionTool\NightVisionTool.csproj") $nightOut
+Write-ToolManifest "NightVisionTool" $nightOut (Join-Path $root "src\NightVisionTool\NightVisionTool.csproj")
 
 # 5. MouseTool
 Write-Host "[5/5] MouseTool" -ForegroundColor Yellow
 $mouseOut = Join-Path $payload "tools\MouseTool"
 Publish-Project (Join-Path $root "src\MouseTool\MouseTool.csproj") $mouseOut
+Write-ToolManifest "MouseTool" $mouseOut (Join-Path $root "src\MouseTool\MouseTool.csproj")
 
 Write-Host ""
 Write-Host "Output layout:" -ForegroundColor Green
